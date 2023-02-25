@@ -1,5 +1,5 @@
 name: basic_lpips_256x256
-work_dir: "./work_dir/"
+work_dir: "/home/viserion/Experiments/Nikhil/MIPI/train_nn_flare/work_dir"
 
 resolution: 256
 high_resolution: 1024
@@ -50,9 +50,9 @@ train:
   num_epoch: 50
   dataset:
     folders_a:
-      - "/home/dancer/dataset/Flickr/synthetic"
+      - "/home/viserion/Experiments/Nikhil/MIPI/database/Flickr24K"
     folders_b:
-      - "/home/dancer/dataset/lens-flare"
+      - "/home/viserion/Experiments/Nikhil/MIPI/database/input_new"
     transform:
       A:
         - ToTensor
@@ -86,9 +86,9 @@ evaluate:
     batch_size: 1
   dataset:
     folders_a:
-      - "/home/dancer/dataset/test_data/paper20/input"
+      - "/home/viserion/Experiments/Nikhil/MIPI/database/Flare7k/test_data/real/input"
     folders_b:
-      - "/home/dancer/dataset/test_data/paper20/ground_truth"
+      - "/home/viserion/Experiments/Nikhil/MIPI/database/Flare7k/test_data/real/gt"
     transform:
       - ToTensor
       - Resize:
@@ -100,7 +100,7 @@ generate:
   dataloader:
     batch_size: 1
   dataset:
-    folders: "/home/dancer/dataset/test_data/paper20/input"
+    folders: "/home/viserion/Experiments/Nikhil/MIPI/codebase-20230204T091337Z-001/test"
     transform:
       - ToTensor
       - Resize:

@@ -21,6 +21,7 @@ python3 main.py ./configs/original_paper.yml --gpus 0 name="ffl_1-lpips_1|l1_1-l
     loss.weight.flare.perceptual=0 \
     loss.weight.scene.ffl=0 \
     loss.weight.scene.l1=1 \
+    
     loss.weight.scene.lpips=1 \
     loss.weight.scene.perceptual=0 \
 ```

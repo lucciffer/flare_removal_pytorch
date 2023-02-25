@@ -12,12 +12,15 @@ from loguru import logger
 from omegaconf import OmegaConf
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-
+import os 
 import networks
 import synthesis
 import utils
 from data import PairedDataset, ImageDataset
 
+import warnings
+
+warnings.filterwarnings("ignore")
 
 def batch_remove_flare(
     images,
@@ -103,16 +106,21 @@ def evaluate_fn(
     config,
     evaluate_dataloader,
     flare_generator,
-    save_images=False,
+    save_images=True,
     output_folder=None,
     device=torch.device("cuda"),
     remain_pbar=False,
 ):
+    output_folder=config.work_dir + '/results'
+    save_images=True
+
     resolution = config.resolution
     high_resolution = config.high_resolution
+    print("inside evaluate function")
     if output_folder is not None:
         output_folder = Path(output_folder)
-        if not output_folder.exists():
+        print("folder created")
+        if not os.path.exists(output_folder):
             output_folder.mkdir()
     assert not (save_images and output_folder is None)
 
@@ -127,15 +135,19 @@ def evaluate_fn(
         images, gt_images = batch["a"]["image"], batch["b"]["image"]
         images = images.to(device, non_blocking=True)
 
+
         results = batch_remove_flare(
             images,
             flare_generator,
             resolution=resolution,
             high_resolution=high_resolution,
         )
-
+        # print(iteration)
         if save_images:
-            image_name = Path(batch["a"]["path"]).name
+            print("saving images")
+            # image_name = Path(batch["a"]["path"]).name
+            image_name = 'image' + str(iteration) + '.png'
+            # print(image_name)
             save_batch_images(results, output_folder / image_name, resolution)
 
         metrics["PSNR"] += K.metrics.psnr(results["pred_blend"], gt_images, 1.0).item()
@@ -191,11 +203,12 @@ def generate(
 def evaluate(
     config,
     resume_from,
-    save_images=False,
+    save_images=True,
     output_folder=None,
     device=torch.device("cuda"),
 ):
     config = OmegaConf.load(config)
+    output_folder = config.work_dir + '/results'
 
     flare_generator = init_generator(config, resume_from, device)
 
@@ -205,10 +218,12 @@ def evaluate(
 
     evaluate_dataloader = DataLoader(evaluate_dataset, **config.evaluate.dataloader)
     logger.info(f"build evaluate_dataloader with config: {config.evaluate.dataloader}")
+    print("OUTPUT FOLDER:", output_folder)
 
     metrics = evaluate_fn(
         config, evaluate_dataloader, flare_generator, save_images, output_folder, device
     )
+
     logger.success(
         "evaluated metrics:\n"
         + "\n".join([f"\t{k}={v:.4f}" for k, v in metrics.items()])
